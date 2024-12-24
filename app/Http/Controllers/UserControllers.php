@@ -2,8 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\FaceRecognation;
-use App\Models\Menu;
 use App\Models\User;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
@@ -19,6 +17,7 @@ class UserControllers extends Controller
         $user['aktif'] = User::where('status', 1)->get()->count();
         $user['tidak_aktif'] = User::where('status', 0)->get()->count();
         $user['users'] = User::get();
+        // $user['users'] = $allUser->faceRecognize;
 
         $logController = app(LogControllers::class);
         $logController->addToLog('Menampilkan list user');

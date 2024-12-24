@@ -50,6 +50,13 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
 
     public function faceRecognize()
     {
-        return $this->hasOne(FaceRecognation::class, 'id_user', 'id');
+        return $this->hasOne(FaceRecognation::class, 'status', 'id');
+    }
+
+    public function checkFR()
+    {
+        $faceRecognition = $this->faceRecognize;
+
+        return $faceRecognition && $faceRecognition->status == 1;
     }
 }

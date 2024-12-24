@@ -22,7 +22,17 @@ class MenuControllers extends Controller
         $menu['menus'] = Menu::where('kategori', 'menu')->get();
         $menu['pengaturan'] = Menu::where('kategori', 'pengaturan')->get();
 
+        $logController = app(LogControllers::class);
+        $logController->addToLog('Menampilkan list seluruh menu');
+
         return $this->sendResponse(200, 'List Semua Menu', $menu, 200);
+    }
+
+    public function getParentMenu()
+    {
+        $parent = Menu::where('parent_id', '=', null)->orWhere('status', '=', 1)->get();
+
+        return $this->sendResponse(200, 'List Parent Menu', $parent, 200);
     }
 
     public function getMenuUser()
@@ -30,7 +40,7 @@ class MenuControllers extends Controller
         $kewenangan_user = User::findOrFail(Auth::user()->id)->kewenangan_id;
         $user = User::findOrFail(Auth::user()->id)->username;
 
-        $menu = Menu::where('status', 1)
+        $menuItems = Menu::where('status', 1)
             ->where(function ($query) use ($kewenangan_user) {
                 $query
                     ->where('kewenangan_id', 'LIKE', '%"' . $kewenangan_user . '"%') // multiple kewenangan
@@ -38,9 +48,35 @@ class MenuControllers extends Controller
             })
             ->get();
 
+        $menuTree = [];
+        foreach ($menuItems as $menu) {
+            if ($menu->parent_id === null) {
+                $menuTree[$menu->id] = [
+                    'nama' => $menu->nama,
+                    'slug' => $menu->slug,
+                    'icon' => $menu->icon,
+                    'status' => $menu->status,
+                    'kewenangan_id' => $menu->kewenangan_id,
+                    'kategori' => $menu->kategori,
+                ];
+            } else {
+                $menuTree[$menu->parent_id]['submenu'][] = [
+                    'url' => $menu->url,
+                    'nama' => $menu->nama,
+                    'slug' => $menu->slug,
+                    'icon' => $menu->icon,
+                    'status' => $menu->status,
+                    'kewenangan_id' => $menu->kewenangan_id,
+                    'kategori' => $menu->kategori,
+                ];
+            }
+        }
+
+        $result = array_values($menuTree);
+
         $logController = app(LogControllers::class);
         $logController->addToLog('Menampilkan list menu ' . $user);
-        return $this->sendResponse(200, 'List Menu ' . $user, $menu, 200);
+        return $this->sendResponse(200, 'List Menu ' . $user, $result, 200);
     }
 
     public function getMenuId($id)
@@ -67,6 +103,7 @@ class MenuControllers extends Controller
             'slug' => $request->slug,
             'url' => $request->url,
             'kategori' => $request->kategori,
+            'parent_id' => $request->parent_id,
             'status' => $request->status == '' ? 1 : $request->status,
             'kewenangan_id' => $request->kewenangan_id == '' ? json_encode([1]) : json_encode($request->kewenangan_id),
         ]);
@@ -93,6 +130,7 @@ class MenuControllers extends Controller
             'url' => $request->url,
             'kategori' => $request->kategori,
             'status' => $request->status,
+            'parent_id' => $request->parent_id,
             'kewenangan_id' => json_encode($request->kewenangan_id),
         ]);
 

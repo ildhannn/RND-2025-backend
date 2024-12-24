@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class FaceRecognation extends Model
 {
-    protected $fillable = ['id_user', 'descriptors'];
+    protected $fillable = ['id_user', 'descriptors', 'status'];
 
     public function user()
     {

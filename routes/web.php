@@ -39,10 +39,12 @@ $router->group(['prefix' => 'api', 'middleware' => 'jwt.auth'], function () use 
 
     // Log
     $router->get('/getAllLog', 'LogControllers@getAllLog');
+    $router->get('/logDashboard', 'LogControllers@dashboard');
 
     // Menu
     $router->get('/getAllMenu', 'MenuControllers@getAllMenu');
     $router->get('/getMenuUser', 'MenuControllers@getMenuUser');
+    $router->get('/getParentMenu', 'MenuControllers@getParentMenu');
     $router->post('/createMenu', 'MenuControllers@createMenu');
     $router->post('/updateMenu/{id}', 'MenuControllers@updateMenu');
     $router->post('/getMenuId/{id}', 'MenuControllers@getMenuId');
@@ -55,5 +57,6 @@ $router->group(['prefix' => 'api', 'middleware' => 'jwt.auth'], function () use 
     // Face Recognation
     $router->get('/getFR/{id}', 'FaceRecognationController@getFR');
     $router->post('/regisFR/{id}', 'FaceRecognationController@regisFR');
+    $router->post('/updateFR/{id}', 'FaceRecognationController@updateFR');
 
 });

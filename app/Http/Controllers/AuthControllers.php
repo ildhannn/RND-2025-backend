@@ -5,9 +5,6 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Validator;
 use Tymon\JWTAuth\Exceptions\JWTException;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
@@ -31,7 +28,7 @@ class AuthControllers extends Controller
                 return response()->json(['error' => 'Username atau Password Salah'], 400);
             }
         } catch (JWTException $e) {
-            return response()->json(['error' => 'could_not_create_token'], 500);
+            return response()->json(['error' => 'Terjadi kesalahan session'], 500);
         }
 
         $user->update([
@@ -66,7 +63,12 @@ class AuthControllers extends Controller
      */
     public function refresh()
     {
-        return $this->respondWithToken(auth()->refresh());
+        try {
+            $newToken = auth()->refresh();
+            return $this->respondWithToken($newToken);
+        } catch (JWTException $e) {
+            return response()->json(['error' => 'Terjadi kesalahan session'], 500);
+        }
     }
 
     /**
@@ -81,7 +83,7 @@ class AuthControllers extends Controller
         return response()->json([
             'access_token' => $token,
             'token_type' => 'bearer',
-            'expires_in' => auth()->factory()->getTTL() + 60 * 60 * 60 * 24,
+            'expires_in' => auth()->factory()->getTTL() * 60
         ]);
     }
 }
